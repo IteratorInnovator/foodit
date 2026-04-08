@@ -1,0 +1,95 @@
+@baseUrl = http://localhost:8080
+@contentType = application/json
+@orderId = PASTE_ORDER_ID_HERE
+
+### Health check
+GET {{baseUrl}}/health
+
+### Create order with optional description
+# @name createOrder
+POST {{baseUrl}}/api/orders
+Content-Type: {{contentType}}
+
+{
+  "buyer_id": "buyer-001",
+  "menu_store_id": "store-001",
+  "items": [
+    {
+      "menu_item_id": "item-001",
+      "name": "Nasi Lemak",
+      "quantity": 2,
+      "unit_price": 500
+    },
+    {
+      "menu_item_id": "item-002",
+      "name": "Teh Tarik",
+      "quantity": 1,
+      "unit_price": 200
+    }
+  ],
+  "description": "Leave at lobby if I do not answer",
+  "food_cost": 1200,
+  "delivery_fee": 350,
+  "drop_off": {
+    "lat": 1.3521,
+    "lng": 103.8198,
+    "address": "80 Stamford Rd, Singapore 178902"
+  },
+  "payment_intent_id": "pi_test_123456"
+}
+
+### Create order without optional description
+POST {{baseUrl}}/api/orders
+Content-Type: {{contentType}}
+
+{
+  "buyer_id": "buyer-002",
+  "menu_store_id": "store-001",
+  "items": [
+    {
+      "menu_item_id": "item-003",
+      "name": "Chicken Rice",
+      "quantity": 1,
+      "unit_price": 650
+    }
+  ],
+  "food_cost": 650,
+  "delivery_fee": 350,
+  "drop_off": {
+    "lat": 1.3000,
+    "lng": 103.8000,
+    "address": "1 Computing Drive, Singapore 117417"
+  },
+  "payment_intent_id": "pi_test_654321"
+}
+
+### Get all orders
+GET {{baseUrl}}/api/orders
+
+### Get pending orders
+GET {{baseUrl}}/api/orders/pending
+
+### Get order by ID
+GET {{baseUrl}}/api/orders/{{orderId}}
+
+### Accept order
+PUT {{baseUrl}}/api/orders/{{orderId}}/accept
+Content-Type: {{contentType}}
+
+{
+  "runner_id": "runner-001"
+}
+
+### Cancel order
+PUT {{baseUrl}}/api/orders/{{orderId}}/cancel
+
+### Update order status directly
+PUT {{baseUrl}}/api/orders/{{orderId}}
+Content-Type: {{contentType}}
+
+{
+  "status": "COMPLETED"
+}
+
+### Delete order
+DELETE {{baseUrl}}/api/orders/{{orderId}}
