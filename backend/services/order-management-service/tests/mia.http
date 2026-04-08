@@ -1,0 +1,11 @@
+@baseUrl = https://13m2v0jgyc.execute-api.ap-southeast-1.amazonaws.com
+@token = PASTE_JWT_TOKEN_HERE
+@orderId = PASTE_ORDER_ID_HERE
+
+### Mark Order as MIA - Success (order must be ACCEPTED)
+PUT {{baseUrl}}/orders/{{orderId}}/mia
+Authorization: Bearer {{token}}
+
+### Mark Order as MIA - Order not found (expect 404)
+PUT {{baseUrl}}/orders/00000000-0000-0000-0000-000000000000/mia
+Authorization: Bearer {{token}}

@@ -1,0 +1,11 @@
+@baseUrl = https://13m2v0jgyc.execute-api.ap-southeast-1.amazonaws.com
+@token = PASTE_JWT_TOKEN_HERE
+@orderId = PASTE_ORDER_ID_HERE
+
+### Cancel Order - Success (order must be PENDING)
+PUT {{baseUrl}}/orders/{{orderId}}/cancel
+Authorization: Bearer {{token}}
+
+### Cancel Order - Order not found (expect 404)
+PUT {{baseUrl}}/orders/00000000-0000-0000-0000-000000000000/cancel
+Authorization: Bearer {{token}}

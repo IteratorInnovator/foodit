@@ -1,0 +1,82 @@
+### Chat Service API Tests
+### Use with VS Code REST Client or JetBrains HTTP Client
+
+@baseUrl = http://localhost:8080
+@buyerId = 22222222-2222-2222-2222-222222222222
+@runnerId = 33333333-3333-3333-3333-333333333333
+@orderId = 11111111-1111-1111-1111-111111111111
+
+### Variables to set after creating a chat room
+@chatRoomId = {{createChatRoom.response.body.chat_room_id}}
+
+
+### ===================
+### Health Check
+### ===================
+
+### Health check
+GET {{baseUrl}}/health
+
+
+### ===================
+### Chat Rooms
+### ===================
+
+### Create a new chat room
+# @name createChatRoom
+POST {{baseUrl}}/api/chat/rooms
+Content-Type: application/json
+
+{
+  "order_id": "{{orderId}}",
+  "buyer_id": "{{buyerId}}",
+  "runner_id": "{{runnerId}}"
+}
+
+### Get chat rooms for buyer
+GET {{baseUrl}}/api/chat/rooms/{{buyerId}}
+
+### Get chat rooms for buyer with pagination
+GET {{baseUrl}}/api/chat/rooms/{{buyerId}}?limit=10
+
+### Get chat rooms for runner
+GET {{baseUrl}}/api/chat/rooms/{{runnerId}}
+
+### Close a chat room
+PUT {{baseUrl}}/api/chat/rooms/{{chatRoomId}}/close
+
+
+### ===================
+### Messages
+### ===================
+
+### Get messages for a chat room
+GET {{baseUrl}}/api/chat/rooms/{{chatRoomId}}/messages
+
+### Get messages with limit
+GET {{baseUrl}}/api/chat/rooms/{{chatRoomId}}/messages?limit=10
+
+### Get messages with pagination
+GET {{baseUrl}}/api/chat/rooms/{{chatRoomId}}/messages?limit=10&page_state=<base64_token>
+
+
+### ===================
+### WebSocket Testing
+### ===================
+### Note: HTTP clients cannot test WebSocket connections directly.
+### Use one of these methods to test WebSocket functionality:
+
+### Method 1: wscat (npm install -g wscat)
+### wscat -c "ws://localhost:8080/ws/{{chatRoomId}}?sender_id={{buyerId}}"
+
+### Method 2: websocat (https://github.com/vi/websocat)
+### websocat ws://localhost:8080/ws/{{chatRoomId}}?sender_id={{buyerId}}
+
+### Method 3: Browser DevTools Console
+### const ws = new WebSocket("ws://localhost:8080/ws/<chatRoomId>?sender_id=<senderId>");
+### ws.onmessage = (e) => console.log(JSON.parse(e.data));
+### ws.send(JSON.stringify({action: "sendMessage", chat_room_id: "<chatRoomId>", content: "Hello!"}));
+
+### WebSocket Message Format:
+### Send: {"action": "sendMessage", "chat_room_id": "<uuid>", "content": "Hello!"}
+### Receive: {"action": "receiveMessage", "message_id": "<uuid>", "sender_id": "<uuid>", "content": "Hello!", "sent_at": "2024-01-15T10:30:00Z"}

@@ -1,0 +1,29 @@
+@baseUrl = https://13m2v0jgyc.execute-api.ap-southeast-1.amazonaws.com
+@token = PASTE_JWT_TOKEN_HERE
+@orderId = PASTE_ORDER_ID_HERE
+@runnerId = PASTE_RUNNER_USER_ID_HERE
+
+### Accept Order - Success
+PUT {{baseUrl}}/orders/{{orderId}}/accept
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "runner_id": "{{runnerId}}"
+}
+
+### Accept Order - Order not found (expect 404)
+PUT {{baseUrl}}/orders/00000000-0000-0000-0000-000000000000/accept
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "runner_id": "{{runnerId}}"
+}
+
+### Accept Order - Missing runner_id (expect 422)
+PUT {{baseUrl}}/orders/{{orderId}}/accept
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{}

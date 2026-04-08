@@ -1,0 +1,21 @@
+### FoodIT Menu Service - API Tests
+### Use with VS Code REST Client or JetBrains HTTP Client
+
+@baseUrl = http://localhost:8080
+
+###
+# Health Check
+GET {{baseUrl}}/health
+
+###
+# Get All Stores
+GET {{baseUrl}}/stores
+
+###
+# Get a Specific Store
+@store_id = 7ad9ef9a-8a40-408c-a491-e82cd851d060
+GET {{baseUrl}}/stores/{{store_id}}
+
+###
+# Get Menu Items for a Store
+GET {{baseUrl}}/stores/{{store_id}}/items

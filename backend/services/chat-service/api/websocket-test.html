@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .container { display: flex; flex-direction: column; gap: 15px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-weight: bold; }
+        input, button { padding: 8px; font-family: monospace; }
+        button { cursor: pointer; background: #007bff; color: white; border: none; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #messages {
+            border: 1px solid #ccc;
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f5f5f5;
+        }
+        .message { padding: 5px 0; border-bottom: 1px solid #eee; }
+        .message.sent { color: blue; }
+        .message.received { color: green; }
+        .message.system { color: gray; font-style: italic; }
+        .message.error { color: red; }
+        .status { padding: 5px 10px; border-radius: 3px; }
+        .status.connected { background: #d4edda; color: #155724; }
+        .status.disconnected { background: #f8d7da; color: #721c24; }
+        .actions { display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Chat Test</h1>
+
+    <div class="container">
+        <div class="form-group">
+            <label>Server URL:</label>
+            <input type="text" id="serverUrl" value="ws://localhost:8080">
+        </div>
+
+        <div class="form-group">
+            <label>Chat Room ID:</label>
+            <input type="text" id="chatRoomId" placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000">
+        </div>
+
+        <div class="form-group">
+            <label>Sender ID:</label>
+            <input type="text" id="senderId" placeholder="e.g., 6ba7b810-9dad-11d1-80b4-00c04fd430c8">
+        </div>
+
+        <div class="actions">
+            <button id="connectBtn" onclick="connect()">Connect</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+            <span id="status" class="status disconnected">Disconnected</span>
+        </div>
+
+        <div class="form-group">
+            <label>Message:</label>
+            <input type="text" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)" disabled>
+            <button id="sendBtn" onclick="sendMessage()" disabled>Send</button>
+        </div>
+
+        <div class="form-group">
+            <label>Messages:</label>
+            <div id="messages"></div>
+        </div>
+
+        <button onclick="clearMessages()">Clear Messages</button>
+    </div>
+
+    <script>
+        let ws = null;
+
+        function log(message, type = 'system') {
+            const messagesDiv = document.getElementById('messages');
+            const msgEl = document.createElement('div');
+            msgEl.className = `message ${type}`;
+            msgEl.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            messagesDiv.appendChild(msgEl);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function setStatus(connected) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = connected ? 'Connected' : 'Disconnected';
+            statusEl.className = `status ${connected ? 'connected' : 'disconnected'}`;
+
+            document.getElementById('connectBtn').disabled = connected;
+            document.getElementById('disconnectBtn').disabled = !connected;
+            document.getElementById('messageInput').disabled = !connected;
+            document.getElementById('sendBtn').disabled = !connected;
+        }
+
+        function connect() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            const chatRoomId = document.getElementById('chatRoomId').value;
+            const senderId = document.getElementById('senderId').value;
+
+            if (!chatRoomId || !senderId) {
+                log('Please enter Chat Room ID and Sender ID', 'error');
+                return;
+            }
+
+            const wsUrl = `${serverUrl}/ws/chat/${chatRoomId}?sender_id=${senderId}`;
+            log(`Connecting to ${wsUrl}...`);
+
+            try {
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    log('Connected successfully!');
+                    setStatus(true);
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        log(`Received: ${JSON.stringify(data, null, 2)}`, 'received');
+                    } catch (e) {
+                        log(`Received: ${event.data}`, 'received');
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    log(`Error: ${error.message || 'Connection error'}`, 'error');
+                };
+
+                ws.onclose = (event) => {
+                    log(`Disconnected (code: ${event.code}, reason: ${event.reason || 'none'})`);
+                    setStatus(false);
+                    ws = null;
+                };
+            } catch (e) {
+                log(`Failed to connect: ${e.message}`, 'error');
+            }
+        }
+
+        function disconnect() {
+            if (ws) {
+                ws.close();
+            }
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const chatRoomId = document.getElementById('chatRoomId').value;
+            const content = messageInput.value.trim();
+
+            if (!content) return;
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('Not connected', 'error');
+                return;
+            }
+
+            const message = {
+                action: 'sendMessage',
+                chat_room_id: chatRoomId,
+                content: content
+            };
+
+            ws.send(JSON.stringify(message));
+            log(`Sent: ${JSON.stringify(message)}`, 'sent');
+            messageInput.value = '';
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+        }
+
+        // Generate UUIDs for testing
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Pre-fill with test UUIDs if empty
+        window.onload = () => {
+            if (!document.getElementById('chatRoomId').value) {
+                document.getElementById('chatRoomId').value = generateUUID();
+            }
+            if (!document.getElementById('senderId').value) {
+                document.getElementById('senderId').value = generateUUID();
+            }
+        };
+    </script>
+</body>
+</html>

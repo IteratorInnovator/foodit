@@ -1,0 +1,65 @@
+@baseUrl = http://localhost:8080
+@userId = user_123
+@stripeCustomerId = cus_xxx
+@stripeConnectId = acct_xxx
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Service Status
+GET {{baseUrl}}/
+
+### Seed Test Balance (dev only)
+POST {{baseUrl}}/balance/seed?amount=1000
+
+### Onboard Runner
+POST {{baseUrl}}/runners/onboard
+Content-Type: application/json
+
+{
+  "email": "isabelleonglw@gmail.com",
+  "name": "isabelle ong"
+}
+
+### Onboard Buyer
+POST {{baseUrl}}/buyers/onboard
+Content-Type: application/json
+
+{
+  "email": "isabelleonglw@gmail.com",
+  "name": "isabelle ong"
+}
+
+### Create Payment
+POST {{baseUrl}}/payments/create
+Content-Type: application/json
+
+{
+  "user_id": "{{userId}}",
+  "customer_id": "{{stripeCustomerId}}",
+  "amount": 50.00
+}
+
+### Create Transfer
+POST {{baseUrl}}/transfers/create
+Content-Type: application/json
+
+{
+  "user_id": "{{userId}}",
+  "destination_account_id": "{{stripeConnectId}}",
+  "amount": 45.00,
+  "description": "Delivery payout"
+}
+
+### Create Refund
+POST {{baseUrl}}/refunds/create
+Content-Type: application/json
+
+{
+  "user_id": "{{userId}}",
+  "payment_intent_id": "pi_xxx",
+  "amount": 50.00
+}
+
+### Get Transactions by User
+GET {{baseUrl}}/transactions/{{userId}}

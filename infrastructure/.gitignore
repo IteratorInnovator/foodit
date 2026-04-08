@@ -1,0 +1,30 @@
+# --- Terraform ---
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+terraform.tfstate.d/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.pytest_cache/
+.pip-cache/
+
+# --- System & IDE ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Lambda Artifacts ---
+deployment.zip
+
+# --- AWS & Secrets (Safety Net) ---
+*.pem
+*.key
+creds.json
+aws_config.ini

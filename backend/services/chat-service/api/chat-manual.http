@@ -1,0 +1,72 @@
+### Chat Service API Tests (Manual)
+### Copy chat_room_id from create response and paste below
+
+@baseUrl = http://localhost:8080
+
+# Set these values manually
+@buyerId = 22222222-2222-2222-2222-222222222222
+@runnerId = 33333333-3333-3333-3333-333333333333
+@orderId = 11111111-1111-1111-1111-111111111111
+@chatRoomId = PASTE_CHAT_ROOM_ID_HERE
+
+
+### ===================
+### Health Check
+### ===================
+
+### Health check
+GET {{baseUrl}}/health
+
+###
+
+
+### ===================
+### Chat Rooms
+### ===================
+
+### 1. Create a new chat room (copy chat_room_id from response)
+POST {{baseUrl}}/api/chat/rooms
+Content-Type: application/json
+
+{
+  "order_id": "{{orderId}}",
+  "buyer_id": "{{buyerId}}",
+  "runner_id": "{{runnerId}}"
+}
+
+###
+
+### 2. Get chat rooms for buyer
+GET {{baseUrl}}/api/chat/rooms/{{buyerId}}
+
+###
+
+### 3. Get chat rooms for runner
+GET {{baseUrl}}/api/chat/rooms/{{runnerId}}
+
+###
+
+### 4. Get chat rooms with pagination
+GET {{baseUrl}}/api/chat/rooms/{{buyerId}}?limit=5
+
+###
+
+### 5. Close a chat room
+PUT {{baseUrl}}/api/chat/rooms/{{chatRoomId}}/close
+
+###
+
+
+### ===================
+### Messages
+### ===================
+
+### 6. Get messages for a chat room
+GET {{baseUrl}}/api/chat/rooms/{{chatRoomId}}/messages
+
+###
+
+### 7. Get messages with limit
+GET {{baseUrl}}/api/chat/rooms/{{chatRoomId}}/messages?limit=10
+
+###

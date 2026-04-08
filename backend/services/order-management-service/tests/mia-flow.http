@@ -1,0 +1,70 @@
+### Full MIA Scenario: checkout → accept → mia
+### Run each request in order using VS Code REST Client
+
+@baseUrl = https://13m2v0jgyc.execute-api.ap-southeast-1.amazonaws.com
+
+# Paste your Cognito JWT access token here (get it from the app's login)
+@token = eyJraWQiOiJIOG81VTRwenlwNXdqVVA1UUNCS1EyT2dcL2tiZTVydWJDeUNKNnBBK0NRYz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI4OTNhODUyYy04MGYxLTcwYjgtMDM4Ny0zMmZjNmVhZjhjMzYiLCJjb2duaXRvOmdyb3VwcyI6WyJhcC1zb3V0aGVhc3QtMV9vTXFQZjUzYWdfR29vZ2xlIl0sImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC5hcC1zb3V0aGVhc3QtMS5hbWF6b25hd3MuY29tXC9hcC1zb3V0aGVhc3QtMV9vTXFQZjUzYWciLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI3MzI1cmNxdmF0cmdzaXZpc200NmplNmZvZSIsIm9yaWdpbl9qdGkiOiI1Y2YwYzdjYi1jMzU2LTQzZDQtYjFkMC1kODFhYWMzZGE3YWQiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXV0aF90aW1lIjoxNzc1MDMzMzg3LCJleHAiOjE3NzUzMTU0MjUsImlhdCI6MTc3NTMxMTgyNSwianRpIjoiODY2ZTRhOGMtMDMzZS00YjBlLWExZWItOThjMTk1MjUxNDEzIiwidXNlcm5hbWUiOiJnb29nbGVfMTE3NTU5OTA2NTE4MTY2MTAwNjg0In0.MWdaMoZAhAC-C-BGr8-uPeRp9QuJzEoqpA6Gm3H9liQRvERhujY5EaHgx6-oQVH5AmS40n4IcCsoL21uGdzLY96tmp_IOezJSMY1xulyQM68lnvVKZpDqPlSTmq3-xCC4_wa1pmLW2xOtTZPLV_ezr2-_nkPkcd5jQlWYRsLxu1dUszwiqdLx1J4ZtLXUPE3XvIAE7DqakiJeKc3IFyde4oasHnmRNbs-N59TU_D23IguyNs3exzD8ZqSmNvfaEltylP-37X3Hnl9zIxhaJOG38Q-52N1UeJNJoQRPyhGXUhal2ztyuXQTWR2JvisIwpWRxsHMUZoizvlSdmDewkjw
+# Paste real user IDs from your system
+@buyerId = 893a852c-80f1-70b8-0387-32fc6eaf8c36
+@runnerId = 699ac51c-e0b1-7001-4a36-9787c29c4afa
+@menuStoreId = bcfb3664-d8bf-45a6-a610-676f8e4b9966
+
+
+### Step 1 — Create order (copy order_id from response)
+# @name checkout
+POST {{baseUrl}}/orders/checkout
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "buyer_id": "{{buyerId}}",
+    "menu_store_id": "{{menuStoreId}}",
+    "items": [
+        {"menu_item_id": "c3d4e5f6-a7b8-9012-cdef-123456789012", "name": "Ban Mian", "quantity": 1, "unit_price": 500}
+    ],
+    "food_cost": 500,
+    "delivery_fee": 350,
+    "platform_fee": 10,
+    "drop_off": {
+        "latitude": 1.3521,
+        "longitude": 103.8198,
+        "address": "123 Orchard Road, Singapore 238867"
+    }
+}
+
+###
+
+# After Step 1: paste the order_id from the response below
+@orderId = b7cccbe4-8c41-445a-ac22-30c80dbdf3c3
+
+### Step 1b — Check order status (should be PENDING before accepting)
+GET {{baseUrl}}/api/orders/{{orderId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Step 2 — Runner accepts the order (status: PENDING → ACCEPTED)
+PUT {{baseUrl}}/orders/{{orderId}}/accept
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "runner_id": "{{runnerId}}"
+}
+
+###
+
+### Step 3 — Buyer reports runner as MIA (status: ACCEPTED → MIA)
+### Expected: 200 {"order_id": "...", "status": "MIA"}
+### Side effects (via Kafka):
+###   - Payment Management: full refund issued to buyer
+###   - Delivery Management: location session closed
+PUT {{baseUrl}}/orders/{{orderId}}/mia
+Authorization: Bearer {{token}}
+
+###
+
+### Verify — Check order status is MIA
+GET {{baseUrl}}/api/orders/{{orderId}}
+Authorization: Bearer {{token}}

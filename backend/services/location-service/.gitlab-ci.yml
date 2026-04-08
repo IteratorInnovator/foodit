@@ -1,0 +1,33 @@
+stages:
+  - test
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+test:
+  stage: test
+  image: python:3.11-slim
+  cache:
+    key: pip-cache
+    paths:
+      - .pip-cache/
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+  script:
+    - pip install -r requirements.txt
+    - pip install pytest pytest-mock "httpx<0.28"
+    - pytest tests/ -v
+
+lint:
+  stage: test
+  image: python:3.11-slim
+  cache:
+    key: pip-cache
+    paths:
+      - .pip-cache/
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+  script:
+    - pip install ruff
+    - ruff check .
