@@ -166,6 +166,21 @@ kubectl get pods -n foodit        # All 9 pods should be Running
 curl http://$(terraform output -raw alb_dns)/health
 ```
 
+### CI/CD Pipeline
+
+All 9 backend services have automated **GitLab CI/CD pipelines** that build and push Docker images to **AWS ECR** on every push to `main`.
+
+**Each pipeline:**
+- Runs security scans (SAST, Secret Detection)
+- Builds Docker image
+- Pushes 2 tagged images to ECR:
+  - `<commit-sha>` - For traceability and production deployments
+  - `latest` - For development and staging
+
+**Setup Instructions:** See [CI-CD-SETUP.md](./CI-CD-SETUP.md)
+
+**ECR Image Reference:** See [ECR-IMAGES.md](./ECR-IMAGES.md)
+
 ---
 
 ## Architecture Overview
@@ -242,7 +257,8 @@ AWS Managed Services
 - **Lambda Triggers** for post-confirmation workflows
 - **Kubernetes Deployment** on EKS Fargate for serverless container orchestration
 - **Infrastructure as Code** with Terraform
-- **CI/CD Pipelines** with GitLab CI for automated builds and deployments
+- **CI/CD Pipelines** with GitLab CI - automated Docker builds, security scans, and AWS ECR pushes
+- **Container Registry** - AWS ECR with dual-tag strategy (commit SHA + latest)
 
 ### Frontend
 - **Cross-platform** mobile and web app using Expo SDK 54
