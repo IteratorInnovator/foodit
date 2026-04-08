@@ -1,0 +1,43 @@
+### Variables
+@baseUrl = https://13m2v0jgyc.execute-api.ap-southeast-1.amazonaws.com
+@validUserId = 699ac51c-e0b1-7001-4a36-9787c29c4afa
+@nonExistentUserId = 00000000-0000-0000-0000-000000000000
+@invalidUserId = not-a-valid-uuid
+
+### Health Check
+GET {{baseUrl}}/health
+
+###############################################
+# User Profile Endpoints
+###############################################
+
+### Get User Profile - Valid User
+GET {{baseUrl}}/api/users/{{validUserId}}
+
+### Get User Profile - Non-Existent User (expects 404)
+GET {{baseUrl}}/api/users/{{nonExistentUserId}}
+
+### Get User Profile - Invalid UUID (expects 400)
+GET {{baseUrl}}/api/users/{{invalidUserId}}
+
+###############################################
+# Stripe Endpoints
+###############################################
+
+### Get Stripe Customer ID - Valid User
+GET {{baseUrl}}/api/users/{{validUserId}}/stripe/customer
+
+### Get Stripe Customer ID - Non-Existent User (expects 404)
+GET {{baseUrl}}/api/users/{{nonExistentUserId}}/stripe/customer
+
+### Get Stripe Customer ID - Invalid UUID (expects 400)
+GET {{baseUrl}}/api/users/{{invalidUserId}}/stripe/customer
+
+### Get Stripe Connect ID - Valid User
+GET {{baseUrl}}/api/users/{{validUserId}}/stripe/connect
+
+### Get Stripe Connect ID - Non-Existent User (expects 404)
+GET {{baseUrl}}/api/users/{{nonExistentUserId}}/stripe/connect
+
+### Get Stripe Connect ID - Invalid UUID (expects 400)
+GET {{baseUrl}}/api/users/{{invalidUserId}}/stripe/connect
