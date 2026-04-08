@@ -1,0 +1,190 @@
+version: '3.8'
+
+services:
+  # Atomic Services - Go
+  order-service:
+    build:
+      context: ./backend/services/order-service
+      dockerfile: Dockerfile
+    container_name: foodit-order-service
+    ports:
+      - "8081:80"
+    environment:
+      - PORT=80
+      - USER_SERVICE_URL=http://user-service:80
+      - PAYMENT_SERVICE_URL=http://payment-service:80
+    env_file:
+      - ./backend/services/order-service/.env
+    networks:
+      - foodit-network
+    restart: unless-stopped
+
+  user-service:
+    build:
+      context: ./backend/services/user-service
+      dockerfile: Dockerfile
+    container_name: foodit-user-service
+    ports:
+      - "8082:80"
+    environment:
+      - PORT=80
+    env_file:
+      - ./backend/services/user-service/.env
+    networks:
+      - foodit-network
+    restart: unless-stopped
+
+  chat-service:
+    build:
+      context: ./backend/services/chat-service
+      dockerfile: Dockerfile
+    container_name: foodit-chat-service
+    ports:
+      - "8083:80"
+    environment:
+      - SERVER_PORT=80
+      - REDIS_ADDR=redis:6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+    env_file:
+      - ./backend/services/chat-service/.env
+    depends_on:
+      - redis
+    networks:
+      - foodit-network
+    restart: unless-stopped
+
+  # Atomic Services - Python
+  payment-service:
+    build:
+      context: ./backend/services/payment-service
+      dockerfile: Dockerfile
+    container_name: foodit-payment-service
+    ports:
+      - "8084:80"
+    environment:
+      - PORT=80
+    env_file:
+      - ./backend/services/payment-service/.env
+    networks:
+      - foodit-network
+    restart: unless-stopped
+
+  location-service:
+    build:
+      context: ./backend/services/location-service
+      dockerfile: Dockerfile
+    container_name: foodit-location-service
+    ports:
+      - "8085:80"
+    environment:
+      - PORT=80
+      - REDIS_ADDR=redis:6379
+    env_file:
+      - ./backend/services/location-service/.env
+    depends_on:
+      - redis
+    networks:
+      - foodit-network
+    restart: unless-stopped
+
+  menu-service:
+    build:
+      context: ./backend/services/menu-service
+      dockerfile: Dockerfile
+    container_name: foodit-menu-service
+    ports:
+      - "8086:80"
+    environment:
+      - PORT=80
+    env_file:
+      - ./backend/services/menu-service/.env
+    networks:
+      - foodit-network
+    restart: unless-stopped
+
+  # Composite Services - Python
+  order-management-service:
+    build:
+      context: ./backend/services/order-management-service
+      dockerfile: Dockerfile
+    container_name: foodit-order-management-service
+    ports:
+      - "8087:80"
+    environment:
+      - PORT=80
+      - ORDER_SERVICE_URL=http://order-service:80
+      - USER_SERVICE_URL=http://user-service:80
+      - PAYMENT_SERVICE_URL=http://payment-service:80
+    env_file:
+      - ./backend/services/order-management-service/.env
+    depends_on:
+      - order-service
+      - user-service
+      - payment-service
+    networks:
+      - foodit-network
+    restart: unless-stopped
+
+  # Kafka Consumer Services - Go
+  delivery-management-service:
+    build:
+      context: ./backend/services/delivery-management-service
+      dockerfile: Dockerfile
+    container_name: foodit-delivery-management-service
+    ports:
+      - "8088:80"
+    environment:
+      - PORT=80
+      - CHAT_SERVICE_URL=http://chat-service:80
+      - LOCATION_SERVICE_URL=http://location-service:80
+    env_file:
+      - ./backend/services/delivery-management-service/.env
+    depends_on:
+      - chat-service
+      - location-service
+    networks:
+      - foodit-network
+    restart: unless-stopped
+
+  payment-management-service:
+    build:
+      context: ./backend/services/payment-management-service
+      dockerfile: Dockerfile
+    container_name: foodit-payment-management-service
+    ports:
+      - "8089:80"
+    environment:
+      - PORT=80
+      - USER_SERVICE_URL=http://user-service:80
+      - PAYMENT_SERVICE_URL=http://payment-service:80
+    env_file:
+      - ./backend/services/payment-management-service/.env
+    depends_on:
+      - user-service
+      - payment-service
+    networks:
+      - foodit-network
+    restart: unless-stopped
+
+  # Shared Infrastructure
+  redis:
+    image: redis:7-alpine
+    container_name: foodit-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - foodit-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+networks:
+  foodit-network:
+    driver: bridge
+    name: foodit-network
+
+volumes:
+  redis_data:
+    name: foodit-redis-data

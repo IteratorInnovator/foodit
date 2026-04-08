@@ -1,0 +1,47 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+README.md
+LICENSE
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies
+**/node_modules
+**/venv
+**/__pycache__
+**/.pytest_cache
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Build artifacts
+**/dist
+**/build
+**/*.exe
+
+# Test coverage
+**/coverage
+**/.coverage
+
+# Infrastructure
+infrastructure/
+frontend/
