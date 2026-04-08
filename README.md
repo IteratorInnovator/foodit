@@ -6,22 +6,6 @@ Unlike traditional delivery platforms, Foodit features curated campus restaurant
 
 **Built with a cloud-native microservices architecture on AWS.**
 
-## Team Members
-
-<div align="center">
-    <table>
-        <tr>
-            <th><a href="https://www.linkedin.com/in/harryng99/">Harry Ng Kok Jing</a></th>
-            <th><a href="https://www.linkedin.com/in/jaredchanxy/">Jared Chan Xu Yang</a></th>
-            <th><a href="https://www.linkedin.com/in/pngjunwei/">Png Jun Wei</a></th>
-            <th><a href="https://www.linkedin.com/in/flashteng/">Flash Teng Xin Huang</a></th>
-            <th><a href="https://www.linkedin.com/in/isabelleongliwen/">Isabelle Ong Liwen</a></th>
-        </tr>
-    </table>
-</div>
-
----
-
 ## Key Features
 
 - **Campus-Focused** - Curated menus from campus restaurants and eateries
@@ -54,6 +38,80 @@ Unlike traditional delivery platforms, Foodit features curated campus restaurant
 
 > Ensure Docker Desktop is running
 
+#### Option 1: Master Docker Compose (Recommended)
+
+Run the entire Foodit platform with all 9 services using the master `docker-compose.yml` at the project root.
+
+**Setup .env files for all services:**
+```bash
+# Option A: Use setup script (Linux/Mac)
+chmod +x setup-env.sh
+./setup-env.sh
+
+# Option B: Use setup script (Windows)
+setup-env.bat
+
+# Option C: Manual setup
+for service in backend/services/*/; do
+  (cd "$service" && cp .env.example .env 2>/dev/null || true)
+done
+```
+
+> **Important:** After creating .env files, configure AWS credentials, service URLs, and API keys in each service's `.env` file.
+
+**Start all services:**
+```bash
+# From project root
+docker-compose up -d --build        # Build and start all services
+docker-compose ps                   # Check service status
+docker-compose logs -f              # View logs from all services
+docker-compose logs -f order-service # View logs from specific service
+```
+
+**Stop all services:**
+```bash
+docker-compose down                 # Stop all services
+docker-compose down -v              # Stop all services and remove volumes
+```
+
+**Available services with unique ports:**
+| Service | Port | URL |
+|---------|------|-----|
+| order-service | 8081 | http://localhost:8081 |
+| user-service | 8082 | http://localhost:8082 |
+| chat-service | 8083 | http://localhost:8083 |
+| payment-service | 8084 | http://localhost:8084 |
+| location-service | 8085 | http://localhost:8085 |
+| menu-service | 8086 | http://localhost:8086 |
+| order-management-service | 8087 | http://localhost:8087 |
+| delivery-management-service | 8088 | http://localhost:8088 |
+| payment-management-service | 8089 | http://localhost:8089 |
+| redis | 6379 | localhost:6379 |
+
+**Benefits:**
+- ✅ No port conflicts - each service has a unique port
+- ✅ Services can communicate via service names (e.g., `http://order-service:80`)
+- ✅ Shared network and Redis instance
+- ✅ Start entire platform with one command
+- ✅ Proper dependency management
+
+#### Option 2: Individual Service Docker Compose
+
+Each backend service has its own `docker-compose.yml` configured with port mapping `8080:80`.
+
+**Run a single service:**
+```bash
+cd backend/services/<service-name>  # e.g., order-service, payment-service
+cp .env.example .env                # Configure environment variables
+docker-compose up -d --build        # Build and start in detached mode
+docker-compose logs -f              # View logs (optional)
+docker-compose down                 # Stop the service
+```
+
+> **Note:** Individual service compose files all use port `8080:80`, so you can only run one service at a time. Use the master docker-compose.yml for running multiple services.
+
+#### Option 2: Manual Setup (Without Docker)
+
 **Backend Services (Go):**
 ```bash
 cd backend/services/order-service  # or user-service, chat-service
@@ -79,6 +137,8 @@ cd backend/services/delivery-management-service  # or payment-management-service
 cp .env.example .env
 go run ./cmd/main.go
 ```
+
+#### Frontend Setup
 
 **Frontend:**
 ```bash
@@ -278,7 +338,7 @@ Payment Management (Kafka consumer)
 <p align="center">
 <a href="https://aws.amazon.com/dynamodb/"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fd/DynamoDB.png" alt="DynamoDB" width="50"/></a>&nbsp;&nbsp;
 <a href="https://aws.amazon.com/keyspaces/"><img src="https://www.vectorlogo.zone/logos/apache_cassandra/apache_cassandra-ar21.svg" alt="Keyspaces" width="120"/></a>&nbsp;&nbsp;
-<a href="https://redis.io/"><img src="https://upload.wikimedia.org/wikipedia/en/6/6b/Redis_Logo.svg" alt="Redis" width="100"/></a>&nbsp;&nbsp;
+<a href="https://redis.io/"><img src="https://www.google.com/imgres?q=redis%20logo&imgurl=https%3A%2F%2Fe7.pngegg.com%2Fpngimages%2F282%2F358%2Fpng-clipart-redis-database-erlang-cache-computer-servers-others-angle-logo.png&imgrefurl=https%3A%2F%2Fwww.pngegg.com%2Fen%2Fsearch%3Fq%3Dredis&docid=NGELoz1MUd5SUM&tbnid=lRq27FdFzLu5CM&vet=12ahUKEwiTrMrN3t6TAxWewzgGHeLtAsIQnPAOegQIJBAB..i&w=900&h=512&hcb=2&ved=2ahUKEwiTrMrN3t6TAxWewzgGHeLtAsIQnPAOegQIJBAB" alt="Redis" width="100"/></a>&nbsp;&nbsp;
 <br>
 <i>DynamoDB · AWS Keyspaces (Cassandra) · Redis (ElastiCache)</i>
 </p>
@@ -365,3 +425,19 @@ Each service directory contains its own `README.md` with API documentation, envi
 - **AWS account** with permissions for: EKS, DynamoDB, Keyspaces, MSK, ElastiCache, S3, Cognito, Secrets Manager, Lambda, ECR, API Gateway, IAM
 - **Stripe account** (test mode) -- API key must be stored in AWS Secrets Manager at `foodit/stripe-secret`
 - **OutSystems** account (for the review service, accessed via ALB redirect at `/reviews/*`)
+
+---
+
+## Team Members
+
+<div align="center">
+    <table>
+        <tr>
+            <th><a href="https://www.linkedin.com/in/ngkokjing/">Ng Kok Jing</a></th>
+            <th><a href="https://www.linkedin.com/in/jaredchanxuyang/">Jared Chan Xu Yang</a></th>
+            <th><a href="https://www.linkedin.com/in/junweipng/">Png Jun Wei</a></th>
+            <th><a href="https://www.linkedin.com/in/flashtxh/">Flash Teng Xin Huang</a></th>
+            <th><a href="https://www.linkedin.com/in/isabelle-ong-b4a663303/">Isabelle Ong Liwen</a></th>
+        </tr>
+    </table>
+</div>
