@@ -147,6 +147,8 @@ npm install
 npx expo start
 ```
 
+See `frontend/README.md` for detailed instructions on running with Android Studio and Xcode.
+
 ### Infrastructure Deployment
 
 ```bash
