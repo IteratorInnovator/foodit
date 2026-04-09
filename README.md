@@ -177,9 +177,248 @@ All 9 backend services have automated **GitLab CI/CD pipelines** that build and 
   - `<commit-sha>` - For traceability and production deployments
   - `latest` - For development and staging
 
-**Setup Instructions:** See [CI-CD-SETUP.md](./CI-CD-SETUP.md)
+#### Pipeline Overview
 
-**ECR Image Reference:** See [ECR-IMAGES.md](./ECR-IMAGES.md)
+Each microservice has its own `.gitlab-ci.yml` file with a standardized pipeline:
+
+```
+┌─────────────┐      ┌─────────────┐
+│  Test Stage │  →   │ Build Stage │
+│             │      │             │
+│  • SAST     │      │ • Docker    │
+│  • Secrets  │      │   Build     │
+│             │      │ • ECR Push  │
+└─────────────┘      └─────────────┘
+```
+
+**Pipeline Stages:**
+
+1. **Test Stage**
+   - **SAST (Static Application Security Testing)** - Scans code for security vulnerabilities
+   - **Secret Detection** - Scans for accidentally committed secrets (API keys, passwords, etc.)
+   - **Unit Tests** (location-service) - Runs pytest tests
+   - **Linting** (location-service) - Runs ruff linter
+
+2. **Build Stage**
+   - Builds Docker image using the service's `Dockerfile`
+   - Tags image with commit SHA and `latest`
+   - Pushes both tags to AWS ECR
+
+#### AWS ECR Configuration
+
+**ECR Repository Naming Convention:**
+
+Each service pushes to its own ECR repository:
+```
+<AWS_ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/foodit/<service-name>:<tag>
+```
+
+**Required ECR Repositories:**
+
+- `foodit/order-service`
+- `foodit/user-service`
+- `foodit/chat-service`
+- `foodit/payment-service`
+- `foodit/location-service`
+- `foodit/menu-service`
+- `foodit/order-management-service`
+- `foodit/delivery-management-service`
+- `foodit/payment-management-service`
+
+**Create ECR Repositories via AWS CLI:**
+
+```bash
+export AWS_REGION=ap-southeast-1
+
+services=(
+  "order-service"
+  "user-service"
+  "chat-service"
+  "payment-service"
+  "location-service"
+  "menu-service"
+  "order-management-service"
+  "delivery-management-service"
+  "payment-management-service"
+)
+
+for service in "${services[@]}"; do
+  aws ecr create-repository \
+    --repository-name "foodit/$service" \
+    --region $AWS_REGION \
+    --image-scanning-configuration scanOnPush=true \
+    --encryption-configuration encryptionType=AES256
+done
+```
+
+#### GitLab CI/CD Variables
+
+Configure these variables in GitLab: **Settings → CI/CD → Variables**
+
+| Variable | Description | Example | Protected | Masked |
+|----------|-------------|---------|-----------|--------|
+| `AWS_ACCOUNT_ID` | Your AWS Account ID | `123456789012` | ✅ | ✅ |
+| `AWS_ACCESS_KEY_ID` | AWS IAM Access Key | `AKIA...` | ✅ | ✅ |
+| `AWS_SECRET_ACCESS_KEY` | AWS IAM Secret Key | `secret...` | ✅ | ✅ |
+| `AWS_REGION` | AWS Region | `ap-southeast-1` | ❌ | ❌ |
+
+**Required IAM Permissions:**
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:GetAuthorizationToken",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage",
+        "ecr:PutImage",
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+#### Example .gitlab-ci.yml (order-service)
+
+```yaml
+stages:
+  - test
+  - build
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+variables:
+  SECRET_DETECTION_ENABLED: "true"
+  AWS_REGION: ap-southeast-1
+  ECR_REPOSITORY: foodit/order-service
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+  IMAGE_URI: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+  LATEST_IMAGE_URI: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
+
+sast:
+  stage: test
+
+secret_detection:
+  stage: test
+
+build_and_push:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - apk add --no-cache python3 py3-pip
+    - pip install --break-system-packages awscli
+    - aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+  script:
+    - docker build --pull -t "$IMAGE_URI" -t "$LATEST_IMAGE_URI" .
+    - docker push "$IMAGE_URI"
+    - docker push "$LATEST_IMAGE_URI"
+  only:
+    - main
+```
+
+#### Pulling Images from ECR
+
+**Authenticate Docker to ECR:**
+```bash
+aws ecr get-login-password --region ap-southeast-1 | \
+  docker login --username AWS --password-stdin \
+  <AWS_ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com
+```
+
+**Pull Specific Version:**
+```bash
+docker pull <AWS_ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/foodit/order-service:abc12345
+```
+
+**Pull Latest Version:**
+```bash
+docker pull <AWS_ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/foodit/order-service:latest
+```
+
+#### ECR Image Registry
+
+**Image Tagging Strategy:**
+
+Each service builds and pushes **2 Docker images** with different tags on every push to `main`:
+
+1. **Commit SHA Tag** - For traceability and rollback
+2. **Latest Tag** - For development and staging
+
+**ECR Repository Structure:**
+```
+AWS ECR (ap-southeast-1)
+├── foodit/order-service
+│   ├── abc12345 (commit SHA)
+│   └── latest
+├── foodit/user-service
+├── foodit/chat-service
+├── foodit/payment-service
+├── foodit/location-service
+├── foodit/menu-service
+├── foodit/order-management-service
+├── foodit/delivery-management-service
+└── foodit/payment-management-service
+```
+
+**Image URI Format:**
+```
+<AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/<REPOSITORY>:<TAG>
+```
+
+**Kubernetes Deployment Example:**
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+spec:
+  template:
+    spec:
+      containers:
+      - name: order-service
+        image: <AWS_ACCOUNT_ID>.dkr.ecr.ap-southeast-1.amazonaws.com/foodit/order-service:latest
+        imagePullPolicy: Always
+```
+
+**Image Lifecycle Management:**
+```json
+{
+  "rules": [
+    {
+      "rulePriority": 1,
+      "description": "Keep last 10 images",
+      "selection": {
+        "tagStatus": "any",
+        "countType": "imageCountMoreThan",
+        "countNumber": 10
+      },
+      "action": {
+        "type": "expire"
+      }
+    }
+  ]
+}
+```
+
+**View Images in ECR:**
+```bash
+aws ecr list-images --repository-name foodit/order-service --region ap-southeast-1
+aws ecr describe-images --repository-name foodit/order-service --image-ids imageTag=latest --region ap-southeast-1
+```
 
 ---
 
@@ -441,6 +680,7 @@ Each service directory contains its own `README.md` with API documentation, envi
 - **AWS account** with permissions for: EKS, DynamoDB, Keyspaces, MSK, ElastiCache, S3, Cognito, Secrets Manager, Lambda, ECR, API Gateway, IAM
 - **Stripe account** (test mode) -- API key must be stored in AWS Secrets Manager at `foodit/stripe-secret`
 - **OutSystems** account (for the review service, accessed via ALB redirect at `/reviews/*`)
+- **Google Maps** -- Provides real-time location sharing and interactive map display within chat sessions between buyers and runners for delivery tracking and coordination ([Documentation](https://developers.google.com/maps/documentation))
 
 ---
 

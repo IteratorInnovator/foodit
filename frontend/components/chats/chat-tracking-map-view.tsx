@@ -160,7 +160,6 @@ export default function ChatTrackingMapView({
             setMiaLoading(true);
             try {
               await reportOrderMia(orderId);
-              onMiaSuccess?.();
               setReviewModalVisible(true);
             } catch (err) {
               Alert.alert('Error', 'Failed to report MIA. Please try again.');
@@ -185,8 +184,9 @@ export default function ChatTrackingMapView({
       setReviewModalVisible(false);
       setReviewRating(0);
       setReviewText('');
+      onMiaSuccess?.();
     }
-  }, [runnerId, reviewRating, reviewText, userId]);
+  }, [runnerId, reviewRating, reviewText, userId, onMiaSuccess]);
 
   useEffect(() => {
     if (isTrackingLocation) {
@@ -778,7 +778,7 @@ export default function ChatTrackingMapView({
 
             <Pressable
               style={styles.skipBtn}
-              onPress={() => setReviewModalVisible(false)}
+              onPress={() => { setReviewModalVisible(false); onMiaSuccess?.(); }}
             >
               <Text style={styles.skipBtnText}>Skip</Text>
             </Pressable>

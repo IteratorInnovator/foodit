@@ -359,14 +359,14 @@ export default function HomeScreen() {
         for (const order of typedOrders) {
           if (
             order.buyer_id === currentUserId &&
-            order.status === "COMPLETED" &&
+            (order.status === "COMPLETED" || order.status === "MIA") &&
             order.runner_id &&
             !promptedOrderIds.current.has(order.order_id) &&
             !reviewedOrderIds.has(order.order_id)
           ) {
             const prev = prevMap.get(order.order_id);
-            // Only prompt if the order just transitioned to COMPLETED
-            if (prev && prev.status !== "COMPLETED") {
+            // Only prompt if the order just transitioned to COMPLETED or MIA
+            if (prev && prev.status !== order.status) {
               promptedOrderIds.current.add(order.order_id);
               setReviewOrder(order);
               setReviewModalVisible(true);
@@ -788,7 +788,7 @@ export default function HomeScreen() {
                       <Text style={styles.modalCancelButtonText}>Cancel Order</Text>
                     </Pressable>
                   )}
-                  {selectedOrder.status === "COMPLETED" &&
+                  {(selectedOrder.status === "COMPLETED" || selectedOrder.status === "MIA") &&
                     selectedOrder.runner_id &&
                     !reviewedOrderIds.has(selectedOrder.order_id) && (
                     <Pressable
