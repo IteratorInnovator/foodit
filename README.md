@@ -700,18 +700,16 @@ Each service directory contains its own `README.md` with API documentation, envi
 
 ---
 
-## Team Members
+## Team Members & Contributions
 
 <div align="center">
     <table>
         <tr>
-            <th><a href="https://www.linkedin.com/in/ngkokjing/">Ng Kok Jing</a></th>
-            <th><a href="https://www.linkedin.com/in/jaredchanxuyang/">Jared Chan Xu Yang</a></th>
-            <th><a href="https://www.linkedin.com/in/junweipng/">Png Jun Wei</a></th>
-            <th><a href="https://www.linkedin.com/in/flashtxh/">Flash Teng Xin Huang</a></th>
-            <th><a href="https://www.linkedin.com/in/isabelle-ong-b4a663303/">Isabelle Ong Liwen</a></th>
+            <th>Name</th>
+            <th>Contributions</th>
         </tr>
         <tr>
+            <td><a href="https://www.linkedin.com/in/ngkokjing/">Ng Kok Jing</a></td>
             <td>
                 <ul>
                     <li>Frontend (Google OAuth via AWS Cognito, Chat Tab & Window)</li>
@@ -721,6 +719,9 @@ Each service directory contains its own `README.md` with API documentation, envi
                     <li>System Architecture Design</li>
                 </ul>
             </td>
+        </tr>
+        <tr>
+            <td><a href="https://www.linkedin.com/in/jaredchanxuyang/">Jared Chan Xu Yang</a></td>
             <td>
                 <ul>
                     <li>IaC (Terraform) for AWS Services (EKS, MSK, ElastiCache, API Gateway)</li>
@@ -729,6 +730,9 @@ Each service directory contains its own `README.md` with API documentation, envi
                     <li>System Architecture Design</li>
                 </ul>
             </td>
+        </tr>
+        <tr>
+            <td><a href="https://www.linkedin.com/in/junweipng/">Png Jun Wei</a></td>
             <td>
                 <ul>
                     <li>Frontend (Backend Integration)</li>
@@ -736,6 +740,9 @@ Each service directory contains its own `README.md` with API documentation, envi
                     <li>Payment Service</li>
                 </ul>
             </td>
+        </tr>
+        <tr>
+            <td><a href="https://www.linkedin.com/in/flashtxh/">Flash Teng Xin Huang</a></td>
             <td>
                 <ul>
                     <li>Frontend (Backend Integration)</li>
@@ -743,6 +750,9 @@ Each service directory contains its own `README.md` with API documentation, envi
                     <li>Order Service</li>
                 </ul>
             </td>
+        </tr>
+        <tr>
+            <td><a href="https://www.linkedin.com/in/isabelle-ong-b4a663303/">Isabelle Ong Liwen</a></td>
             <td>
                 <ul>
                     <li>Frontend (Map & Real-Time Location, Activity Tab, Home Tab, Create Order Tab, Backend Integration)</li>
