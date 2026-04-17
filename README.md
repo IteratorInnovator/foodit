@@ -712,11 +712,44 @@ Each service directory contains its own `README.md` with API documentation, envi
             <th><a href="https://www.linkedin.com/in/isabelle-ong-b4a663303/">Isabelle Ong Liwen</a></th>
         </tr>
         <tr>
-            <td>Frontend (OAuth, Chat)<br>Chat Service<br>Delivery Management<br>User Service<br>System Architecture</td>
-            <td>Terraform IaC<br>(EKS, MSK, ElastiCache,<br>API Gateway)<br>Order Management<br>Location Service<br>System Architecture</td>
-            <td>Frontend Integration<br>Payment Management<br>Payment Service</td>
-            <td>Frontend Integration<br>Review Service (OutSystems)<br>Order Service</td>
-            <td>Frontend (Maps, Location,<br>Activity, Home, Orders)<br>Menu Service<br>Payment Service</td>
+            <td>
+                <ul>
+                    <li>Frontend (Google OAuth via AWS Cognito, Chat Tab & Window)</li>
+                    <li>Chat Service</li>
+                    <li>Delivery Management Service</li>
+                    <li>User Service</li>
+                    <li>System Architecture Design</li>
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    <li>IaC (Terraform) for AWS Services (EKS, MSK, ElastiCache, API Gateway)</li>
+                    <li>Order Management Service</li>
+                    <li>Location Service</li>
+                    <li>System Architecture Design</li>
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    <li>Frontend (Backend Integration)</li>
+                    <li>Payment Management Service</li>
+                    <li>Payment Service</li>
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    <li>Frontend (Backend Integration)</li>
+                    <li>Review Service (OutSystems)</li>
+                    <li>Order Service</li>
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    <li>Frontend (Map & Real-Time Location, Activity Tab, Home Tab, Create Order Tab, Backend Integration)</li>
+                    <li>Menu Service</li>
+                    <li>Payment Service</li>
+                </ul>
+            </td>
         </tr>
     </table>
 </div>
