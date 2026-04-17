@@ -16,9 +16,7 @@ Unlike traditional delivery platforms, Foodit features curated campus restaurant
 
 ## Architecture Diagram
 
-<div align="center">
-    <img src="YOUR_ARCHITECTURE_DIAGRAM_URL" alt="Foodit Architecture Diagram" width="800"/>
-</div>
+<img width="1280" height="1171" alt="system architecture" src="https://github.com/user-attachments/assets/36302bef-ed2a-4ec0-b0cb-3e1d82bc289b" />
 
 ## Key Features
 
