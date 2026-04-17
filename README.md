@@ -6,6 +6,20 @@ Unlike traditional delivery platforms, Foodit features curated campus restaurant
 
 **Built with a cloud-native microservices architecture on AWS.**
 
+## Demo Video
+
+<div align="center">
+    <a href="https://youtu.be/Y5-Mfs0yGRY?si=5GyJ1ip3VscNx8dT">
+        FoodIT Demo Video
+    </a>
+</div>
+
+## Architecture Diagram
+
+<div align="center">
+    <img src="YOUR_ARCHITECTURE_DIAGRAM_URL" alt="Foodit Architecture Diagram" width="800"/>
+</div>
+
 ## Key Features
 
 - **Campus-Focused** - Curated menus from campus restaurants and eateries
@@ -696,6 +710,13 @@ Each service directory contains its own `README.md` with API documentation, envi
             <th><a href="https://www.linkedin.com/in/junweipng/">Png Jun Wei</a></th>
             <th><a href="https://www.linkedin.com/in/flashtxh/">Flash Teng Xin Huang</a></th>
             <th><a href="https://www.linkedin.com/in/isabelle-ong-b4a663303/">Isabelle Ong Liwen</a></th>
+        </tr>
+        <tr>
+            <td>Frontend (OAuth, Chat)<br>Chat Service<br>Delivery Management<br>User Service<br>System Architecture</td>
+            <td>Terraform IaC<br>(EKS, MSK, ElastiCache,<br>API Gateway)<br>Order Management<br>Location Service<br>System Architecture</td>
+            <td>Frontend Integration<br>Payment Management<br>Payment Service</td>
+            <td>Frontend Integration<br>Review Service (OutSystems)<br>Order Service</td>
+            <td>Frontend (Maps, Location,<br>Activity, Home, Orders)<br>Menu Service<br>Payment Service</td>
         </tr>
     </table>
 </div>
