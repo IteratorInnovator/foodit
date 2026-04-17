@@ -6,13 +6,7 @@ Unlike traditional delivery platforms, Foodit features curated campus restaurant
 
 **Built with a cloud-native microservices architecture on AWS.**
 
-## Demo Video
-
-<div align="center">
-    <a href="https://youtu.be/Y5-Mfs0yGRY?si=5GyJ1ip3VscNx8dT">
-        FoodIT Demo Video
-    </a>
-</div>
+[Demo Video](https://youtu.be/Y5-Mfs0yGRY?si=5GyJ1ip3VscNx8dT)
 
 ## Architecture Diagram
 
